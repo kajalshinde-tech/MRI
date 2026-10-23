@@ -1,0 +1,8 @@
+'use client';
+import {Activity,ShieldCheck,ArrowRight} from 'lucide-react';
+import {Role} from '../../lib/data';
+const roles:Role[]=['State Admin','District Admin','Officer','Centre'];
+export default function LoginPage(){
+ function enter(role:Role){localStorage.setItem('mahacare-session',JSON.stringify({role,district:'Pune'}));window.location.assign('/');}
+ return <main className="demo-login"><a className="brand" href="/"><span className="brand-icon"><Activity size={25}/></span><span><b>MahaCare<span className="brand-dot">.</span></b><small>DIAGNOSTIC REGISTRY</small></span></a><section className="panel"><span className="eyebrow">PHASE 1 · DEMONSTRATION</span><h1>Choose your workspace</h1><p className="muted">Explore a connected diagnostic centre registry with fictional Maharashtra records.</p><div className="role-grid">{roles.map(role=><button key={role} onClick={()=>enter(role)}><ShieldCheck size={22}/><strong>{role}</strong><small>{role==='State Admin'?'All eight sample districts':role==='Centre'?'One sample centre':'Assigned district records'}</small><ArrowRight size={16}/></button>)}</div><p className="warning">Demo role selector only. This is not real authentication. All records and registration numbers are fictional.</p></section><a className="text-button" href="/">Return to demo dashboard <ArrowRight size={15}/></a></main>;
+}

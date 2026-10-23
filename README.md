@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. Use `npm run build` for a static export to `out/`, and `npm run typecheck` for TypeScript checks.
+Open http://127.0.0.1:3000 for the dashboard or `/login` for the demo role selector. Use `npm run build` for a static export to `out/`, and `npm run typecheck` for TypeScript checks.
 
 ## Review Phase 1
 
