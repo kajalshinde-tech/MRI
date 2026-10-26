@@ -4,8 +4,8 @@ export default function FieldWorkspace() {
   const open = () => {
     let session = { district: 'Pune' };
     try { session = { ...session, ...JSON.parse(localStorage.getItem('mahacare-session') || '{}') }; } catch {}
-    localStorage.setItem('mahacare-session', JSON.stringify({ ...session, role: 'Officer' }));
-    window.location.assign('/portal');
+    localStorage.setItem('mahacare-session', JSON.stringify({ ...session, role: 'Officer', demoLogin: true }));
+    window.location.assign('/portal?role=Officer');
   };
   return <main className="pub-container py-12" style={{ maxWidth: 640 }}>
     <h1>Field inspector workspace</h1>

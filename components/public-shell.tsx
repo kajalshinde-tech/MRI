@@ -44,7 +44,7 @@ export default function PublicShell({ children }: { children: React.ReactNode })
             <span className="pub-demo-desc"> Fictional records · Not an official service.</span>
           </span>
         </div>
-        <Link href="/login" className="pub-portal-link">Portal login <ArrowUpRight size={12} /></Link>
+        <Link href="/login" className="pub-portal-link">Portal Login <ArrowUpRight size={12} /></Link>
       </div>
 
       {/* Header */}

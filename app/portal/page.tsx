@@ -115,7 +115,6 @@ export default function PortalPage() {
   const [showEquipModal, setShowEquipModal] = useState(false);
   const [showDocModal, setShowDocModal] = useState(false);
   const [reset, setReset] = useState(false);
-  const [login, setLogin] = useState(false);
   const [toast, setToast] = useState('');
 
   // Form states for modals
@@ -130,8 +129,10 @@ export default function PortalPage() {
     window.addEventListener('registry-updated', refresh);
     try {
       const prefs = JSON.parse(localStorage.getItem('mahacare-session') || '{}');
-      if (roles.includes(prefs.role)) setRole(prefs.role);
-      else localStorage.setItem('mahacare-session', JSON.stringify({ role: 'State Admin', district: 'Pune' }));
+      if (!prefs.demoLogin) { window.location.replace('/login'); return; }
+      const initialRole = roles.includes(prefs.role) ? prefs.role : 'State Admin';
+      setRole(initialRole);
+      localStorage.setItem('mahacare-session', JSON.stringify({ ...prefs, role: initialRole, district: prefs.district || 'Pune' }));
       if (districts.includes(prefs.district)) setDistrict(prefs.district);
       if (prefs.centreId) setActiveCentreId(prefs.centreId);
     } catch {}
@@ -188,13 +189,9 @@ export default function PortalPage() {
     setIndex(1);
   }
 
-  function chooseRole(value: Role) {
-    setRole(value);
-    setPage('Dashboard');
-    setFilter('All districts');
-    setStatus('All statuses');
-    setIndex(1);
-    localStorage.setItem('mahacare-session', JSON.stringify({ role: value, district, centreId: activeCentreId }));
+  function logout() {
+    localStorage.removeItem('mahacare-session');
+    window.location.assign('/login');
   }
 
   // Active Centre for Centre Role (C001 - Sahyadri MRI)
@@ -331,14 +328,13 @@ export default function PortalPage() {
           WORKSPACE <span>DEMO</span>
         </div>
 
-        <button className="workspace w-full text-left cursor-pointer" onClick={() => setLogin(true)}>
+        <div className="workspace w-full text-left">
           <span className="workspace-icon"><ShieldCheck size={19} /></span>
           <div>
             <strong>{role === 'State Admin' ? 'Maharashtra State' : role === 'Centre' ? centreRoleCentre.name : district + ' District'}</strong>
-            <small>{role} portal (Click to switch)</small>
+            <small>Registry workspace</small>
           </div>
-          <ChevronDown size={14} />
-        </button>
+        </div>
 
         <p className="nav-label">NAVIGATION</p>
         <nav>
@@ -375,16 +371,16 @@ export default function PortalPage() {
           {role === 'Centre' && <select aria-label="Your demo centre" value={activeCentreId} onChange={e => { setActiveCentreId(e.target.value); localStorage.setItem('mahacare-session', JSON.stringify({ role, district, centreId: e.target.value })); }}>
             {db.centres.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>}
-          <p>Multi-role oversight with live browser-retained state.</p>
+          <p>Centre records and monitoring.</p>
         </div>
 
         <div className="sidebar-bottom">
           <div className="avatar">AD</div>
           <div>
             <strong>Demo Operator</strong>
-            <small>{role}</small>
+            <small>Signed in</small>
           </div>
-          <button aria-label="Switch demo role" onClick={() => setLogin(true)}>
+          <button aria-label="Logout" title="Logout" onClick={logout}>
             <LogOut size={17} />
           </button>
         </div>
@@ -411,17 +407,18 @@ export default function PortalPage() {
           </div>
 
           <div className="top-actions">
+            <Link href="/" className="portal-header-action"><ExternalLink size={15} /><span>Go to Website</span></Link>
+            <button className="portal-header-action" onClick={logout}><LogOut size={15} /><span>Logout</span></button>
             <span className="environment">
               <span className="pulse" /> Interactive prototype
             </span>
             <button aria-label="Open notifications" onClick={() => navigate('Notifications')}>
               <Bell size={19} />
             </button>
-            <button className="profile-button cursor-pointer" onClick={() => setLogin(true)}>
+            <div className="profile-button">
               <span className="avatar small">AD</span>
-              <span>{role}</span>
-              <ChevronDown size={14} />
-            </button>
+              <span>My Account</span>
+            </div>
           </div>
         </header>
 
@@ -432,7 +429,7 @@ export default function PortalPage() {
             <b>Demonstration only.</b> All centres, IDs, and records are fictional. Simulates Maharashtra Clinical Oversight.
           </span>
           <Link className="portal-public-link ml-auto text-xs text-teal-700 flex items-center gap-1 font-semibold" href="/">
-            Public Portal <ArrowUpRight size={14} />
+            Go to Website <ArrowUpRight size={14} />
           </Link>
         </div>
 
@@ -467,9 +464,7 @@ export default function PortalPage() {
                   <ClipboardList size={16} /> Conduct Field Inspection
                 </button>
               )}
-              <button className="button white cursor-pointer" onClick={() => setLogin(true)}>
-                <ShieldCheck size={16} /> Switch Role <ChevronDown size={14} />
-              </button>
+
             </div>
           </div>
 
@@ -1131,7 +1126,7 @@ export default function PortalPage() {
                   {certificateCentres.map(c => <option key={c.id} value={c.id}>{c.name} — {c.udcid}</option>)}
                 </select>
               </label>}
-              {certificateCentre ? <QrCertificate centre={certificateCentre} /> : <p className="panel p-5">A certificate is available after inspection and administrator approval.</p>}
+              {certificateCentre ? <QrCertificate centre={certificateCentre} documents={db.documents.filter(d => d.centreId === certificateCentre.id)} /> : <p className="panel p-5">A certificate is available after inspection and administrator approval.</p>}
             </section>
           )}
 
@@ -1335,7 +1330,7 @@ export default function PortalPage() {
             <section className="panel settings">
               <h2>Demo Environment Settings</h2>
               <p>
-                This prototype shares demo records through the local server and caches them on your device. Role selection simulates role-based access control.
+                This prototype shares demo records through the local server and caches them on your device. Access is simulated for demonstration purposes.
               </p>
 
               <div>
@@ -1645,41 +1640,6 @@ export default function PortalPage() {
               <button type="submit" className="button primary text-xs">Upload Document</button>
             </div>
           </form>
-        </Modal>
-      )}
-
-      {/* Role Switcher Modal */}
-      {login && (
-        <Modal title="Choose Demo Role Workspace" onClose={() => setLogin(false)}>
-          <p className="muted">
-            Explore the connected Maharashtra clinical registry through different viewpoints. All roles share the same live state.
-          </p>
-          <div className="role-grid">
-            {roles.map(r => (
-              <button
-                key={r}
-                className={role === r ? 'selected' : ''}
-                onClick={() => {
-                  chooseRole(r);
-                  setLogin(false);
-                  setToast(`${r} workspace opened.`);
-                }}
-              >
-                <ShieldCheck size={22} />
-                <strong>{r}</strong>
-                <small>
-                  {r === 'State Admin'
-                    ? 'Statewide health registry, 8 KPI cards & charts'
-                    : r === 'District Admin'
-                    ? `${district} district administration & compliance`
-                    : r === 'Officer'
-                    ? 'Field inspections, GPS audits & approvals'
-                    : 'Sahyadri MRI: QR plate, staff & renewals'}
-                </small>
-                <ArrowRight size={16} />
-              </button>
-            ))}
-          </div>
         </Modal>
       )}
 
