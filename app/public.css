@@ -1605,16 +1605,33 @@ h2 { font-size: 22px; font-weight: 750; color: #0f172a; letter-spacing: -0.5px; 
 .top-actions .portal-header-action:hover { background:#f0fdfa; border-color:#0d9488; }
 @media(max-width:700px) { .top-actions .environment,.top-actions .profile-button { display:none; } .top-actions { gap:6px; } .top-actions .portal-header-action { padding:8px; font-size:11px; } .top-left > span { display:none; } }
 
-.admin-login { max-width:480px !important; margin-inline:auto; }
-.admin-login .panel h1 { font-size:28px; line-height:1.2; margin-bottom:10px; }
-.admin-login-form { display:grid; gap:18px; margin-top:24px; }
-.admin-login-form label { display:block; font-size:13px; font-weight:600; color:#21394b; margin-bottom:7px; }
-.admin-login-form input { display:block; width:100%; min-height:46px; padding:11px 13px; border:1px solid #cbd5e1; border-radius:8px; background:white; font-size:14px; color:#193447; }
-.admin-login-form input:focus-visible { outline:2px solid #0d9488; outline-offset:2px; }
-.admin-login-form .button { min-height:46px; justify-content:center; font-size:14px; }
-.admin-login-note { margin:18px 0 0; font-size:12px; line-height:1.6; color:#64748b; }
-.admin-login-error { font-size:13px; color:#b91c1c; margin:0; }
-@media(max-width:520px) { .demo-login.admin-login { padding:32px 16px !important; } .admin-login > .panel { padding:24px 20px; } }
-
-.admin-login-form select { display:block; width:100%; min-height:46px; padding:11px 13px; border:1px solid #cbd5e1; border-radius:8px; background:white; font-size:14px; color:#193447; }
-.admin-login-form select:focus-visible { outline:2px solid #0d9488; outline-offset:2px; }
+/* Compact login fits the viewport without clipping form controls. */
+.demo-login.admin-login {
+  width:100%; max-width:440px !important; min-height:100svh;
+  margin:0 auto; padding:20px 16px !important;
+  display:flex; flex-direction:column; justify-content:center; gap:16px;
+}
+.admin-login > .brand { margin:0; padding:0 4px; flex-shrink:0; }
+.admin-login > .panel { padding:22px 24px; margin:0; width:100%; }
+.admin-login .eyebrow { font-size:10px; letter-spacing:1.6px; }
+.admin-login .panel h1 { font-size:25px; line-height:1.2; margin:8px 0; }
+.admin-login .panel > .muted { font-size:12px; line-height:1.5; }
+.admin-login-form { display:grid; gap:12px; margin-top:18px; }
+.admin-login-form label { display:block; font-size:12px; font-weight:600; color:#21394b; margin-bottom:5px; }
+.admin-login-form input,.admin-login-form select { display:block; width:100%; min-height:42px; padding:9px 11px; border:1px solid #cbd5e1; border-radius:8px; background:white; font-size:14px; line-height:1.4; color:#193447; }
+.admin-login-form input:focus-visible,.admin-login-form select:focus-visible { outline:2px solid #0d9488; outline-offset:2px; }
+.admin-login-form .button { min-height:42px; padding:9px 12px; justify-content:center; font-size:14px; }
+.admin-login-note { margin:12px 0 0; font-size:11px; line-height:1.45; color:#64748b; }
+.admin-login-error { font-size:12px; color:#b91c1c; margin:0; }
+.admin-login > .text-button { margin:0; align-self:center; font-size:12px; line-height:1.4; }
+@media(max-height:620px) {
+  .demo-login.admin-login { padding:12px 16px !important; gap:10px; }
+  .admin-login > .panel { padding:16px 20px; }
+  .admin-login .panel h1 { font-size:23px; margin:5px 0; }
+  .admin-login-form { margin-top:12px; gap:9px; }
+  .admin-login-note { margin-top:10px; }
+}
+@media(max-width:520px) {
+  .demo-login.admin-login { max-width:420px !important; }
+  .admin-login-form input,.admin-login-form select { font-size:16px; }
+}
