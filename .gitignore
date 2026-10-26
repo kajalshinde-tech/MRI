@@ -4,3 +4,7 @@ out/
 outputs/
 .npm-cache/
 *.tsbuildinfo
+.runtime/
+.vercel/
+.env*
+!.env.example

@@ -1,42 +1,231 @@
 'use client';
-import {useEffect,useState,useRef} from 'react';
-import {Activity,LayoutDashboard,Building2,ClipboardList,ShieldCheck,ArrowUpRight,Search,Bell,ChevronDown,Menu,X,ArrowRight,MapPin,RotateCcw,Check,Clock,FileText,LogOut,Settings,Stethoscope,HeartPulse} from 'lucide-react';
-import {Database,Role, seed, districts, scopedCentres, validity, daysUntil} from '../lib/data';
-import {load,save,updateDatabase} from '../lib/storage';
-const roles:Role[]=['State Admin','District Admin','Officer','Centre'];
-const icons=[LayoutDashboard,Building2,FileText,Bell,Settings];
-function Badge({children}:{children:string}) {return <span className={`badge ${children==='Approved'||children==='Valid'?'green':children==='Expired'||children==='Rejected'?'red':children==='Draft'?'gray':'amber'}`}>{children}</span>}
-function Modal({title,children,onClose}:{title:string;children:React.ReactNode;onClose:()=>void}) {const ref=useRef<HTMLElement>(null);useEffect(()=>{const previous=document.activeElement as HTMLElement;const modal=ref.current;const getFocusable=()=>Array.from(modal?.querySelectorAll<HTMLElement>('button, a, input, select, [tabindex="0"]')||[]);getFocusable()[0]?.focus();function key(e:KeyboardEvent){if(e.key==='Escape')onClose();if(e.key==='Tab'){const nodes=getFocusable();const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}}document.addEventListener('keydown',key);const priorOverflow=document.body.style.overflow;document.body.style.overflow='hidden';return()=>{document.removeEventListener('keydown',key);document.body.style.overflow=priorOverflow;previous?.focus();}},[onClose]);return <div className="overlay" onClick={onClose}><section ref={ref} className="modal" role="dialog" aria-modal="true" aria-label={title} onClick={e=>e.stopPropagation()}><header><h2>{title}</h2><button aria-label="Close dialog" onClick={onClose}><X size={20}/></button></header>{children}</section></div>}
-export default function App(){
- const [db,setDb]=useState<Database|null>(null),[role,setRole]=useState<Role>('State Admin'),[district,setDistrict]=useState('Pune'),[page,setPage]=useState('Dashboard'),[mobile,setMobile]=useState(false),[collapsed,setCollapsed]=useState(false),[query,setQuery]=useState(''),[filter,setFilter]=useState('All districts'),[status,setStatus]=useState('All statuses'),[sort,setSort]=useState('newest'),[index,setIndex]=useState(1),[detail,setDetail]=useState<string|null>(null),[reset,setReset]=useState(false),[toast,setToast]=useState(''),[login,setLogin]=useState(false),[publicView,setPublicView]=useState(false);
- useEffect(()=>{const result=load();setDb(result.db);if(result.recovered)setToast('Saved demo data could not be read. Sample data restored.');try{const prefs=JSON.parse(localStorage.getItem('mahacare-session')||'{}');if(roles.includes(prefs.role))setRole(prefs.role);if(districts.includes(prefs.district))setDistrict(prefs.district);}catch{}},[]);
- useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(''),6000);return()=>clearTimeout(timer);},[toast]);
- if(!db)return <div className="loading"><Activity/> Preparing your demo workspace…</div>;
- const centres=scopedCentres(db,role,district),ids=new Set(centres.map(c=>c.id)),docs=db.documents.filter(d=>ids.has(d.centreId)),inspections=db.inspections.filter(i=>ids.has(i.centreId)),complaints=db.complaints.filter(c=>ids.has(c.centreId)),expired=new Set(docs.filter(d=>validity(d.expiryDate)==='Expired').map(d=>d.centreId)),approved=centres.filter(c=>c.status==='Approved').length,pending=centres.filter(c=>!['Approved','Rejected','Draft'].includes(c.status)).length;
- const shown=centres.filter(c=>(filter==='All districts'||c.district===filter)&&(status==='All statuses'||(status==='Pending verification'?!['Approved','Rejected','Draft'].includes(c.status):c.status===status))&&`${c.name} ${c.udcid}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):b.createdAt.localeCompare(a.createdAt));
- const selected=db.centres.find(c=>c.id===detail);const menus=['Dashboard',role==='Centre'?'My Centre':'Centres','Documents','Notifications','Settings'];
- function navigate(value:string){setPage(value);setMobile(false);setQuery('');setStatus('All statuses');setFilter('All districts');setIndex(1);}
- function chooseRole(value:Role){setRole(value);setPage('Dashboard');setFilter('All districts');setStatus('All statuses');setIndex(1);localStorage.setItem('mahacare-session',JSON.stringify({role:value,district}));}
- function table(limit:number){return <div className="table-scroll"><table><thead><tr><th>Centre name</th><th>District</th><th>Facility type</th><th>Application status</th><th></th></tr></thead><tbody>{shown.slice(page==='Dashboard'?0:(index-1)*8,page==='Dashboard'?limit:index*8).map(c=><tr key={c.id}><td><button className="centre-link" onClick={()=>setDetail(c.id)}><span className="centre-icon"><Building2 size={17}/></span><span><strong>{c.name}</strong><small>{c.udcid}</small></span></button></td><td>{c.district}</td><td>{c.type}</td><td><Badge>{c.status}</Badge></td><td><button aria-label={`View ${c.name}`} onClick={()=>setDetail(c.id)}><ArrowUpRight size={17}/></button></td></tr>)}</tbody></table>{!shown.length&&<div className="empty">No centres match your search. Try another name or filter.</div>}</div>}
- return <div className={`app ${collapsed?'collapsed':''}`}>
- <aside className={mobile?'sidebar open':'sidebar'}><a href="#" className="brand" onClick={e=>{e.preventDefault();navigate('Dashboard')}}><span className="brand-icon"><Activity size={25}/></span><span><b>MahaCare<span className="brand-dot">.</span></b><small>DIAGNOSTIC REGISTRY</small></span></a><button className="mobile-close" aria-label="Close navigation" onClick={()=>setMobile(false)}><X/></button><div className="workspace-label">WORKSPACE <span>DEMO</span></div><div className="workspace"><span className="workspace-icon"><ShieldCheck size={19}/></span><div><strong>{role==='State Admin'?'Maharashtra State':role==='Centre'?'Centre workspace':district+' District'}</strong><small>{role} portal</small></div><ChevronDown size={14}/></div><p className="nav-label">OVERVIEW</p><nav>{menus.map((item,i)=>{const Icon=icons[i];return <button key={item} className={page===item?'active':''} onClick={()=>navigate(item)}><Icon size={19}/><span>{item}</span>{item==='Notifications'&&<em>{db.notifications.filter(n=>!n.read&&(role==='State Admin'||n.district===district)).length}</em>}</button>})}</nav><div className="phase-note"><span className="pulse"/> PHASE 01<span>Foundation & demo data</span><p>More workflows will be added in the next phases.</p></div><div className="sidebar-bottom"><div className="avatar">AD</div><div><strong>Demo administrator</strong><small>{role}</small></div><button aria-label="Switch demo role" onClick={()=>setLogin(true)}><LogOut size={17}/></button></div></aside>
- {mobile&&<div className="backdrop" onClick={()=>setMobile(false)}/>}
- <div className="main"><header className="topbar"><div className="top-left"><button aria-label="Toggle navigation" onClick={()=>{if(window.innerWidth<900)setMobile(!mobile);else setCollapsed(!collapsed)}}><Menu size={20}/></button><span>Workspace <span className="slash">/</span> <b>{page}</b></span></div><div className="top-actions"><span className="environment"><span className="pulse"/> Demo environment</span><button aria-label="Open notifications" onClick={()=>navigate('Notifications')}><Bell size={19}/></button><button className="profile-button" onClick={()=>setLogin(true)}><span className="avatar small">AD</span><span>{role}</span><ChevronDown size={14}/></button></div></header>
- <div className="demo-strip"><ShieldCheck size={15}/><span><b>Demonstration only.</b> All centres, registration numbers, and records are fictional. No government affiliation.</span><button onClick={()=>setPublicView(true)}>Public view <ArrowUpRight size={14}/></button></div>
- <main><div className="page-heading"><div><div className="eyebrow">MAHARASHTRA · DIAGNOSTIC CENTRE REGISTRY</div><h1>{page==='Dashboard'?(role==='Centre'?'Your centre, at a glance':role==='Officer'?'Your review workspace':'Registry overview'):page}</h1><p>{page==='Dashboard'?'A clearer view of diagnostic care, compliance, and centre activity.':'Manage and explore connected sample records in your workspace.'}</p></div><button className="button white" onClick={()=>setLogin(true)}><ShieldCheck size={16}/>Switch demo role<ChevronDown size={14}/></button></div>
- <div className="context-bar"><span><span className="pulse"/> Live demo data <span className="muted">· Updated locally</span></span><div>{role!=='Centre'&&<select aria-label="Assigned demo district" value={district} onChange={e=>{setDistrict(e.target.value);setIndex(1);localStorage.setItem('mahacare-session',JSON.stringify({role,district:e.target.value}));}}>{districts.map(d=><option key={d}>{d}</option>)}</select>}<span className="scope"><MapPin size={14}/>{role==='State Admin'?'All Maharashtra':role==='Centre'?'Your centre':district}</span></div></div>
- {page==='Dashboard'&&<><section className="stats">{[{label:role==='Officer'?'District centres':'Total centres',value:centres.length,note:role==='State Admin'?'Across 8 sample districts':'Within your demo scope',icon:Building2,color:'blue',filter:'All statuses'},{label:'Approved centres',value:approved,note:'Application approval recorded',icon:ShieldCheck,color:'teal',filter:'Approved'},{label:'Pending verification',value:pending,note:'Applications in progress',icon:ClipboardList,color:'orange',filter:'Pending verification'},{label:'Expired documents',value:expired.size,note:'Centres requiring attention',icon:FileText,color:'rose',filter:'All statuses'}].map((stat,i)=><button className="stat-card" key={stat.label} onClick={()=>{navigate(i===3?'Documents':'Centres');setStatus(stat.filter)}}><span className={`stat-icon ${stat.color}`}><stat.icon size={21}/></span><ArrowUpRight className="stat-arrow" size={16}/><p>{stat.label}</p><strong>{String(stat.value).padStart(2,'0')}</strong><small><span className={i===1?'text-teal':''}>{i===1?<Check size={12}/>:null}{stat.note}</span></small></button>)}</section>
- <section className="overview-grid"><div className="panel district-panel"><div className="panel-title"><div><h2>{role==='State Admin'?'Centres across Maharashtra':'Centre distribution'}</h2><p>Registered sample facilities by district</p></div><span className="pill">{centres.length} centres</span></div><div className="bars">{(role==='State Admin'?districts:[role==='Centre'?centres[0].district:district]).map(d=>{const count=centres.filter(c=>c.district===d).length;return <button className="bar-row" key={d} onClick={()=>{navigate('Centres');setFilter(d)}}><span>{d}</span><div className="bar-track"><div style={{width:`${Math.max(5,count/Math.max(...districts.map(x=>centres.filter(c=>c.district===x).length))*100)}%`}}/></div><b>{count}</b></button>})}</div><div className="panel-footer"><span className="legend-dot"/> Sample diagnostic centres <span>8 districts in the demo dataset</span></div></div><div className="panel compliance-panel"><div className="panel-title"><div><h2>Approval snapshot</h2><p>Current application outcomes</p></div><Activity size={19}/></div><div className="donut" style={{background:`conic-gradient(#138d83 0 ${approved/centres.length*100}%, #ecb35e ${approved/centres.length*100}% ${(approved+pending)/centres.length*100}%, #e8edf2 0)`}}><div><strong>{Math.round(approved/centres.length*100)}<small>%</small></strong><span>approved</span></div></div><div className="donut-legend"><span><i className="teal-dot"/>Approved <b>{approved}</b></span><span><i className="orange-dot"/>In progress <b>{pending}</b></span><span><i className="gray-dot"/>Draft / rejected <b>{centres.length-approved-pending}</b></span></div></div></section>
- <section className="lower-grid"><div className="panel records"><div className="panel-title"><div><h2>Recent centres</h2><p>The latest records in your workspace</p></div><button className="text-button" onClick={()=>navigate(role==='Centre'?'My Centre':'Centres')}>View all <ArrowRight size={15}/></button></div>{table(5)}</div><div className="panel attention"><div className="panel-title"><div><h2>Needs attention</h2><p>Stay ahead of upcoming actions</p></div><span className="attention-dot"/></div><button onClick={()=>navigate('Documents')}><span className="notice-icon orange"><FileText size={18}/></span><div><strong>{docs.filter(d=>validity(d.expiryDate)==='Expiring soon').length} documents expiring soon</strong><p>Within the next 60 days</p></div><ArrowUpRight size={16}/></button><div className="attention-item"><span className="notice-icon blue"><ClipboardList size={18}/></span><div><strong>{inspections.filter(i=>i.status==='Scheduled'&&daysUntil(i.scheduledAt)<0).length} inspections overdue</strong><p>Scheduling workflow · Phase 5</p></div></div><div className="attention-item"><span className="notice-icon teal"><Clock size={18}/></span><div><strong>{complaints.filter(c=>!['Resolved','Closed'].includes(c.status)).length} open complaints</strong><p>Complaint workflow · Phase 6</p></div></div><div className="demo-callout"><HeartPulse size={23}/><b>Built for better oversight</b><p>One connected registry for centres, officers, and administrators.</p></div></div></section></>}
- {(page==='Centres'||page==='My Centre')&&<section className="panel"><div className="panel-title"><div><h2>Centre records</h2><p>{shown.length} fictional facilities in your current scope</p></div><span className="pill">Sample data</span></div><div className="filters"><label className="search"><Search size={17}/><input placeholder="Search centre name or UDCID" value={query} onChange={e=>{setQuery(e.target.value);setIndex(1)}}/></label>{role==='State Admin'&&<select aria-label="Filter district" value={filter} onChange={e=>{setFilter(e.target.value);setIndex(1)}}><option>All districts</option>{districts.map(d=><option key={d}>{d}</option>)}</select>}<select aria-label="Application status" value={status} onChange={e=>{setStatus(e.target.value);setIndex(1)}}><option>All statuses</option><option>Pending verification</option>{Array.from(new Set(centres.map(c=>c.status))).map(s=><option key={s}>{s}</option>)}</select><select aria-label="Sort centres" value={sort} onChange={e=>setSort(e.target.value)}><option value="newest">Newest first</option><option value="name">Name A–Z</option></select></div>{table(8)}<div className="pagination"><span>{shown.length} records · Page {index} of {Math.max(1,Math.ceil(shown.length/8))}</span><div><button disabled={index===1} onClick={()=>setIndex(index-1)}>Previous</button><button disabled={index*8>=shown.length} onClick={()=>setIndex(index+1)}>Next</button></div></div></section>}
- {page==='Documents'&&<section className="panel"><div className="panel-title"><div><h2>Document overview</h2><p>Illustrative requirements only; validity is independent of application approval.</p></div></div><div className="table-scroll"><table><thead><tr><th>Document / sample number</th><th>Centre</th><th>Category</th><th>Expiry</th><th>Validity</th></tr></thead><tbody>{docs.map(d=><tr key={d.id}><td><strong>{d.title}</strong><small>{d.registration}</small></td><td>{centres.find(c=>c.id===d.centreId)?.name}</td><td>{d.category}</td><td>{d.expiryDate||'Not applicable'}</td><td><Badge>{validity(d.expiryDate)}</Badge></td></tr>)}</tbody></table></div></section>}
- {page==='Notifications'&&<section className="panel"><div className="panel-title"><div><h2>Workspace notifications</h2><p>Sample updates for your assigned scope</p></div><button className="button white" onClick={()=>{setDb(updateDatabase(db,d=>{d.notifications.forEach(n=>{if(role==='State Admin'||n.district===district)n.read=true})}));setToast('Notifications marked as read.')}}>Mark all as read</button></div>{db.notifications.filter(n=>role==='State Admin'||n.district===district).map(n=><div className="notification" key={n.id}><Bell size={19}/><span>{n.message}</span><Badge>{n.read?'Read':'Unread'}</Badge></div>)}</section>}
- {page==='Settings'&&<section className="panel settings"><h2>Demo workspace settings</h2><p>This prototype stores sample records in this browser. Role selection simulates access and is not authentication.</p><div><h3>Reset demo data</h3><p>Replace local sample records with a fresh dataset. Dates will be recalculated from today.</p><button className="button danger" onClick={()=>setReset(true)}><RotateCcw size={16}/>Reset Demo Data</button></div><div><h3>Language</h3><p>English is available in Phase 1. Marathi integration and translation fallback are planned for Phase 8.</p></div></section>}
- <footer><span><Activity size={14}/> MahaCare Registry <b>·</b> Phase 1 foundation</span><span>Fictional data. Browser-local demonstration.</span></footer></main></div>
- {detail&&selected&&<Modal title="Centre record" onClose={()=>setDetail(null)}><span className="eyebrow">FICTIONAL SAMPLE · {selected.udcid}</span><h3 className="detail-title">{selected.name}</h3><Badge>{selected.status}</Badge><dl><dt>District / taluka</dt><dd>{selected.district} / {selected.taluka}</dd><dt>Facility type</dt><dd>{selected.type}</dd><dt>Address</dt><dd>{selected.address}</dd><dt>Services</dt><dd>{selected.services.join(', ')}</dd><dt>Last updated</dt><dd>{selected.updatedAt}</dd></dl>{expired.has(selected.id)&&<p className="warning">An illustrative document has expired. Application approval and document validity are separate.</p>}<p className="muted">Read-only foundation record. Registration and review actions arrive in later phases.</p></Modal>}
- {login&&<Modal title="Choose a demo workspace" onClose={()=>setLogin(false)}><p className="muted">Explore the same connected dataset through different roles. No sign-in is required for this demonstration.</p><div className="role-grid">{roles.map(r=><button className={role===r?'selected':''} key={r} onClick={()=>{chooseRole(r);setLogin(false);setToast(`${r} workspace opened.`)}}><ShieldCheck size={22}/><strong>{r}</strong><small>{r==='State Admin'?'All eight sample districts':r==='Centre'?'One sample centre':'Assigned district records'}</small><ArrowRight size={16}/></button>)}</div><p className="warning">Demo roles simulate access. Production requires authentication and server-side permissions.</p></Modal>}
- {reset&&<Modal title="Reset sample records?" onClose={()=>setReset(false)}><p>This replaces all saved demo records in this browser. Your current role stays selected.</p><div className="dialog-actions"><button className="button white" onClick={()=>setReset(false)}>Cancel</button><button className="button danger" onClick={()=>{const next=seed();save(next);setDb(next);setReset(false);setToast('Demo data reset successfully.')}}>Reset demo data</button></div></Modal>}
- {publicView&&<Modal title="MahaCare public preview" onClose={()=>setPublicView(false)}><div className="public-hero"><Stethoscope size={38}/><h3>A connected view of diagnostic care.</h3><p>Explore the foundation of Maharashtra’s fictional diagnostic centre registry.</p></div><p>The public directory, search, FAQs, and approved centre profiles will be implemented in Phase 2.</p><button className="button primary" onClick={()=>{setPublicView(false);setLogin(true)}}>Explore demo workspaces <ArrowRight size={16}/></button></Modal>}
- {toast&&<div className="toast" role="status"><Check size={18}/>{toast}<button aria-label="Dismiss message" onClick={()=>setToast('')}><X size={16}/></button></div>}
- </div>;
+import Link from 'next/link';
+import {
+  Search, ArrowRight, ShieldCheck, MapPin, ScanLine, Building2,
+  Activity, FileCheck2, ArrowUpRight, Smartphone, QrCode, Sparkles
+} from 'lucide-react';
+import PublicShell, { PublicBadge } from '../components/public-shell';
+import CentreCard from '../components/centre-card';
+import { usePublicData } from '../components/use-public-data';
+import { districts } from '../lib/data';
+
+export default function Home() {
+  const { centres } = usePublicData();
+
+  return (
+    <PublicShell>
+      {/* Hero Section */}
+      <section className="public-hero-section">
+        <div className="public-container hero-grid">
+          <div>
+            <span className="hero-eyebrow">
+              <span /> MAHARASHTRA · DEMO REGISTRY
+            </span>
+            <h1>
+              Clarity for every<br />
+              <em>care decision.</em>
+            </h1>
+            <p>
+              Find diagnostic centres. Explore their services.<br className="desktop-break" />
+              Check approval and document information in one place.
+            </p>
+
+            <form className="hero-search" action="/centres">
+              <div className="hero-search-input-wrap">
+                <Search size={19} />
+                <input
+                  name="q"
+                  aria-label="Search centre name, UDCID, district or taluka"
+                  placeholder="Search centre name, UDCID, district or taluka…"
+                />
+              </div>
+              <button type="submit">
+                Find a centre <ArrowRight size={16} />
+              </button>
+            </form>
+
+            <div className="hero-actions">
+              <Link href="/verify">
+                <ScanLine size={15} /> Verify centre <ArrowUpRight size={13} />
+              </Link>
+              <span className="hero-action-sep" />
+              <Link href="/register">
+                Register centre <ArrowUpRight size={13} />
+              </Link>
+            </div>
+
+            <div className="hero-footnote">
+              <ShieldCheck size={14} /> Sample information for demonstration. Not a licence validation service.
+            </div>
+          </div>
+
+          <div className="hero-visual">
+            <div className="hero-orbit orbit-one" />
+            <div className="hero-orbit orbit-two" />
+            <div className="floating-mark">
+              <Activity size={29} />
+            </div>
+            <div className="preview-profile">
+              <div className="preview-label">
+                <span>
+                  <span className="pulse" /> PUBLIC CENTRE PROFILE
+                </span>
+                <ShieldCheck size={16} />
+              </div>
+              <div className="preview-facility">
+                <Building2 size={29} />
+              </div>
+              <PublicBadge tone="gray">ILLUSTRATIVE PREVIEW</PublicBadge>
+              <h2>Sahyadri MRI 1</h2>
+              <p>
+                <MapPin size={13} />
+                Haveli, Pune · Maharashtra
+              </p>
+              <div className="preview-code" translate="no">
+                MH-PUN-2024-001 <span>SAMPLE UDCID</span>
+              </div>
+              <div className="preview-line">
+                <span>Approval</span>
+                <PublicBadge tone="teal">Approved</PublicBadge>
+              </div>
+              <div className="preview-line">
+                <span>Document validity</span>
+                <PublicBadge tone="amber">Review separately</PublicBadge>
+              </div>
+              <div className="preview-disclaimer">
+                <FileCheck2 size={18} />
+                <span>
+                  Clear status. Useful details.<br />
+                  <b>One stable centre profile.</b>
+                </span>
+              </div>
+            </div>
+            <div className="floating-caption">
+              <ShieldCheck size={18} />
+              <span>
+                Information you can inspect.<small>Built around transparency.</small>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="public-container">
+        {/* Trust row */}
+        <section className="public-trust-row">
+          <div>
+            <b>{centres === null ? '—' : centres.length}</b>
+            <span>approved sample centres</span>
+          </div>
+          <div>
+            <b>{districts.length}</b>
+            <span>districts supported</span>
+          </div>
+          <div>
+            <b>6</b>
+            <span>sample facility categories</span>
+          </div>
+          <div className="trust-note">
+            <ShieldCheck size={24} />
+            <p>
+              Approval and document validity<br />
+              <strong>are shown independently.</strong>
+            </p>
+          </div>
+        </section>
+
+        {/* Paths section */}
+        <section className="public-section">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">START WITH WHAT YOU NEED</span>
+              <h2>Find the right information, faster.</h2>
+            </div>
+            <p>A clear path from discovery to a centre’s public record.</p>
+          </div>
+          <div className="public-paths">
+            {[
+              {
+                icon: Search,
+                n: '01',
+                title: 'Find a centre',
+                text: 'Search approved sample facilities by district, service, or centre ID.',
+                href: '/centres',
+                label: 'Explore directory',
+              },
+              {
+                icon: ScanLine,
+                n: '02',
+                title: 'Check the public record',
+                text: 'Look up a UDCID to see approval, services, and document information.',
+                href: '/verify',
+                label: 'Verify a centre',
+              },
+              {
+                icon: Smartphone,
+                n: '03',
+                title: 'Read a clinic report',
+                text: 'Read staff, equipment, services and document details in one report.',
+                href: '/mobile/centres/MH-PUN-2024-001',
+                label: 'View sample report',
+              },
+            ].map(item => (
+              <article key={item.n}>
+                <div>
+                  <span className="path-icon">
+                    <item.icon size={22} />
+                  </span>
+                  <small>{item.n}</small>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+                <Link href={item.href}>
+                  {item.label}
+                  <ArrowRight size={15} />
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Featured centres */}
+        <section className="public-section featured-section">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">EXPLORE THE REGISTRY</span>
+              <h2>A closer look at sample centres.</h2>
+            </div>
+            <Link className="pub-button light" href="/centres">
+              View all centres <ArrowRight size={16} />
+            </Link>
+          </div>
+          <div className="public-centre-grid">
+            {centres === null ? (
+              <p className="public-loading" role="status">Loading approved sample centres…</p>
+            ) : (
+              centres.slice(0, 3).map(c => <CentreCard key={c.udcid} centre={c} />)
+            )}
+          </div>
+        </section>
+
+        {/* Districts section */}
+        <section className="public-section districts-section">
+          <div>
+            <span className="eyebrow">LOCAL INFORMATION, CONNECTED</span>
+            <h2>Explore Maharashtra,<br />one district at a time.</h2>
+            <p>Register and filter centres across all 36 districts. Sample records cover selected districts. Public results include only approved records.</p>
+          </div>
+          <div className="district-links">
+            {districts.map((d, i) => (
+              <Link href={`/centres?district=${encodeURIComponent(d)}`} key={d}>
+                <span className="district-number">{String(i + 1).padStart(2, '0')}</span>
+                {d}
+                <ArrowUpRight size={15} />
+              </Link>
+            ))}
+          </div>
+        </section>
+      </div>
+    </PublicShell>
+  );
 }
