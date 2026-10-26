@@ -219,7 +219,7 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
             {/* Quick Contact & Details Row */}
             <div className="report-summary-details">
               <div className="report-owner-detail">
-                {centre!.udcid === 'MH-PUN-2024-001' && <figure className="report-owner-photo"><Image src="/demo-clinic-owner.png" alt="AI-generated illustration of the demo clinic owner" width={72} height={80} sizes="72px" className="demo-owner-image" /><figcaption>AI portrait</figcaption></figure>}
+                {centre!.udcid === 'MH-PUN-2024-001' && <figure className="report-owner-photo"><Image src="/demo-clinic-owner.png" alt="AI-generated illustration of the demo clinic owner" width={72} height={80} sizes="72px" className="demo-owner-image" /></figure>}
                 <div className="report-owner-info">
                   <span className="report-detail-label">Director / Owner</span>
                   <strong>{centre!.owner.name}</strong>
