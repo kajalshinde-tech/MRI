@@ -145,7 +145,7 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
       <div key="profile" className="pub-container centre-profile-page">
         <div className="mobile-app-shell">
           {/* Top Bar (Native App Style) */}
-          <div className="app-top-bar">
+          {!standalone && <div className="app-top-bar">
             <Link href="/centres" className="app-action-btn mail" style={{ padding: '6px 12px', gap: 4 }}>
               <ArrowLeft size={14} /> <span>All Centres</span>
             </Link>
@@ -158,7 +158,7 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
               {copied ? <Check size={14} style={{ color: '#0d9488' }} /> : <Share2 size={14} />}
               <span>{copied ? 'Copied!' : 'Share'}</span>
             </button>
-          </div>
+          </div>}
 
           {/* State Department Verification Seal Header */}
           <div className="gov-seal-banner" style={{ padding: '12px 16px', borderRadius: 12 }}>
@@ -250,7 +250,7 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
           <StatusBanner status={centre!.status} />
 
           {/* Native App-Style Segmented Tabs */}
-          {standalone ? <nav className="citizen-report-sections" aria-label="Report sections"><a href="#report-staff">Doctors & staff</a><a href="#report-equipment">Equipment</a><a href="#report-permits">Permits & QR</a></nav> : <div className="app-tabs-nav">
+          {standalone ? <nav className="citizen-report-sections" aria-label="Report sections"><a href="#report-staff">Doctors & staff</a><a href="#report-equipment">Equipment</a><a href="#report-permits">Permits</a></nav> : <div className="app-tabs-nav">
             <button
               onClick={() => setActiveTab('staff')}
               className={`app-tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
@@ -404,7 +404,7 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
           {(standalone || activeTab === 'permits') && (
             <div id="report-permits" className="report-section">
               {/* Dynamic QR Verification Box */}
-              <div className="app-card" style={{ textAlign: 'center', padding: '24px 16px' }}>
+              {!standalone && <div className="app-card" style={{ textAlign: 'center', padding: '24px 16px' }}>
                 <span style={{ fontSize: 10, textTransform: 'uppercase', fontWeight: 700, color: '#0f766e', letterSpacing: '1px', display: 'block', marginBottom: 12 }}>
                   Public Profile QR Plate
                 </span>
@@ -423,7 +423,7 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
                 <div style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f766e', marginTop: 6, fontSize: 13 }} translate="no">
                   {centre!.udcid}
                 </div>
-              </div>
+              </div>}
 
               {/* Statutory Clearances */}
               <div className="app-card">
