@@ -1685,3 +1685,12 @@ h2 { font-size: 22px; font-weight: 750; color: #0f172a; letter-spacing: -0.5px; 
   .report-summary-card .app-quick-actions { margin:0 12px 12px; gap:8px; }
   .report-summary-card .app-action-btn { padding:8px 6px; font-size:11px; }
 }
+
+@media(max-width:600px) {
+  .report-clinic-heading { justify-content:center !important; text-align:center; }
+  .report-clinic-heading > .pub-badge { margin-left:0; }
+  .report-clinic-heading > div > div { justify-content:center; flex-wrap:wrap; }
+  .report-clinic-heading h1 { text-align:center; margin-inline:auto !important; }
+  .report-clinic-heading p { justify-content:center; }
+  .report-clinic-heading p > span { max-width:100%; }
+}
