@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import PublicShell, { PublicBadge } from '../components/public-shell';
 import CentreCard from '../components/centre-card';
+import DemoOwner from '../components/demo-owner';
 import { usePublicData } from '../components/use-public-data';
 import { districts } from '../lib/data';
 
@@ -207,6 +208,8 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        <DemoOwner />
 
         {/* Districts section */}
         <section className="public-section districts-section">
