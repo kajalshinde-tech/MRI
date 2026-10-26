@@ -1636,14 +1636,28 @@ h2 { font-size: 22px; font-weight: 750; color: #0f172a; letter-spacing: -0.5px; 
   .admin-login-form input,.admin-login-form select { font-size:16px; }
 }
 
-.demo-owner-section { display:grid; grid-template-columns:minmax(0,320px) minmax(0,1fr); align-items:center; gap:clamp(24px,5vw,72px); }
-.demo-owner-portrait { position:relative; margin:0; aspect-ratio:1; border-radius:20px; overflow:hidden; background:#e7eeec; box-shadow:0 12px 32px #19344712; }
-.demo-owner-image { display:block; width:100%; height:100%; object-fit:cover; object-position:center; animation:owner-portrait-drift 14s ease-in-out infinite; }
-.demo-owner-portrait figcaption { position:absolute; bottom:0; left:0; right:0; padding:24px 12px 12px; background:linear-gradient(transparent,rgba(16,45,67,.7)); color:white; font-size:10px; text-align:center; }
-.demo-owner-copy h2 { font-size:clamp(24px,3vw,34px); line-height:1.25; margin:12px 0 18px; color:#1e3a5f; }
-.demo-owner-copy p { font-size:15px; line-height:1.75; color:#4d6578; max-width:560px; margin:0 0 16px; }
-.demo-owner-copy .demo-owner-disclosure { font-size:12px; color:#768591; }
-.demo-owner-copy .pub-button { margin-top:4px; }
+/* Small illustrative owner portrait belongs to the sample QR report only. */
+.report-summary-card { padding:16px; margin-bottom:12px; }
+.report-summary-details { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:12px; margin-top:12px; padding-top:12px; border-top:1px solid #edf1f3; font-size:12px; }
+.report-owner-detail { display:flex; align-items:center; gap:10px; min-width:0; }
+.report-owner-photo { position:relative; flex:0 0 64px; width:64px; height:76px; overflow:hidden; border-radius:9px; margin:0; background:#e7eeec; }
+.report-owner-photo img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; animation:owner-portrait-drift 14s ease-in-out infinite; }
+.report-owner-photo figcaption { position:absolute; bottom:0; width:100%; color:white; background:#193447b3; font-size:8px; line-height:1.5; text-align:center; }
+.report-owner-info { min-width:0; font-size:12px; line-height:1.45; }
+.report-owner-info strong { display:block; color:#0f172a; margin:2px 0; font-size:13px; }
+.report-detail-label { display:block; font-size:10px; color:#64748b; text-transform:uppercase; font-weight:700; }
 @keyframes owner-portrait-drift { 0%,100% { transform:scale(1); } 50% { transform:scale(1.025); } }
-@media(max-width:640px) { .demo-owner-section { grid-template-columns:1fr; gap:24px; } .demo-owner-portrait { width:min(100%,320px); justify-self:center; } .demo-owner-copy p { font-size:14px; } }
-@media(prefers-reduced-motion:reduce) { .demo-owner-image { animation:none; } }
+.citizen-report .gov-seal-banner { margin-bottom:12px; }
+.citizen-report .report-summary-card h1 { font-size:clamp(20px,4vw,25px) !important; }
+.citizen-report .app-top-bar { margin-bottom:10px; }
+@media(max-width:520px) {
+  .citizen-report .gov-seal-banner { flex-direction:row; align-items:center; gap:8px; }
+  .citizen-report .gov-seal-badge { display:none; }
+  .report-summary-details { grid-template-columns:1fr; gap:10px; }
+  .report-summary-details > div:last-child { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; padding-top:8px; border-top:1px solid #edf1f3; }
+  .report-summary-details > div:last-child > span:last-child { font-size:10px; }
+  .report-owner-photo { flex-basis:56px; width:56px; height:66px; }
+  .citizen-report .report-summary-card { padding:12px; }
+  .citizen-report .verify-status-strip { margin:10px 0 !important; }
+}
+@media(prefers-reduced-motion:reduce) { .report-owner-photo img { animation:none; } }

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Building2, MapPin, CheckCircle2, Clock, XCircle, AlertCircle,
   Shield, ArrowLeft, Flag, Stethoscope,
@@ -190,7 +191,7 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
           )}
 
           {/* Centre Hero Profile Card */}
-          <div className="app-card" style={{ padding: 18, marginBottom: 14 }}>
+          <div className="app-card report-summary-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -216,11 +217,14 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
             </div>
 
             {/* Quick Contact & Details Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f1f5f9', fontSize: 11 }}>
-              <div>
-                <span style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Director / Owner</span>
-                <strong style={{ color: '#0f172a', fontSize: 12, display: 'block', marginTop: 2 }}>{centre!.owner.name}</strong>
-                <span style={{ color: '#475569' }}>{centre!.owner.qualification}</span>
+            <div className="report-summary-details">
+              <div className="report-owner-detail">
+                {centre!.udcid === 'MH-PUN-2024-001' && <figure className="report-owner-photo"><Image src="/demo-clinic-owner.png" alt="AI-generated illustration of the demo clinic owner" width={72} height={80} sizes="72px" className="demo-owner-image" /><figcaption>AI portrait</figcaption></figure>}
+                <div className="report-owner-info">
+                  <span className="report-detail-label">Director / Owner</span>
+                  <strong>{centre!.owner.name}</strong>
+                  <span>{centre!.owner.qualification}</span>
+                </div>
               </div>
               <div>
                 <span style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Last Inspection</span>
