@@ -1660,3 +1660,28 @@ h2 { font-size: 22px; font-weight: 750; color: #0f172a; letter-spacing: -0.5px; 
   .citizen-report .verify-status-strip { margin:10px 0 !important; }
 }
 @media(prefers-reduced-motion:reduce) { .report-owner-photo img { animation:none; } }
+
+/* Centre identity, owner profile and inspection form distinct report areas. */
+.citizen-report .report-summary-card { overflow:hidden; padding:0; border-radius:16px; }
+.report-clinic-heading { padding:18px; background:linear-gradient(120deg,#f0fdfa,#f8fafc 80%); border-bottom:1px solid #e0eeeb; }
+.report-clinic-heading h1 { text-wrap:balance; }
+.report-summary-card .report-summary-details { margin:0; padding:16px; border:0; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:14px; align-items:center; }
+.report-summary-card .report-owner-detail { flex-direction:column; text-align:center; gap:10px; padding:16px 12px; border:1px solid #e2eeeb; border-radius:12px; background:linear-gradient(180deg,#f5fbf9,white); }
+.report-summary-card .report-owner-photo { flex:0 0 auto; width:84px; height:94px; border-radius:18px; border:3px solid white; box-shadow:0 0 0 1px #cde7e2,0 5px 14px #0f766e12; }
+.report-summary-card .report-owner-info strong { font-size:15px; margin:5px 0 3px; }
+.report-owner-info .report-detail-label { font-size:9px; letter-spacing:1px; color:#0f766e; }
+.report-inspection-detail { display:flex; flex-direction:column; justify-content:center; gap:6px; padding:16px; border-left:2px solid #ccfbf1; }
+.report-summary-card .app-quick-actions { margin:0 16px 16px; padding-top:12px; }
+.report-summary-card .app-action-btn { min-height:40px; }
+@media(max-width:600px) {
+  .report-clinic-heading { flex-wrap:wrap; padding:14px; gap:8px !important; }
+  .report-clinic-heading > div { flex-basis:100% !important; }
+  .report-clinic-heading > .pub-badge { order:-1; margin-left:auto; }
+  .report-summary-card .report-summary-details { grid-template-columns:1fr; padding:12px; gap:10px; }
+  .report-summary-card .report-owner-detail { padding:14px 12px; }
+  .report-summary-card .report-owner-photo { width:78px; height:88px; }
+  .report-summary-card .report-inspection-detail { display:grid; grid-template-columns:1fr auto; align-items:center; gap:4px 10px; border:1px solid #e6edf1; background:#f8fafc; border-radius:10px; padding:10px 12px; }
+  .report-inspection-detail > span:last-child { grid-column:1 / -1; font-size:11px !important; }
+  .report-summary-card .app-quick-actions { margin:0 12px 12px; gap:8px; }
+  .report-summary-card .app-action-btn { padding:8px 6px; font-size:11px; }
+}

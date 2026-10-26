@@ -192,7 +192,7 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
 
           {/* Centre Hero Profile Card */}
           <div className="app-card report-summary-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+            <div className="report-clinic-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <span style={{ fontSize: 10, fontWeight: 750, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#0f766e', background: '#f0fdfa', padding: '2px 8px', borderRadius: 4, border: '1px solid #ccfbf1' }}>
@@ -219,14 +219,14 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
             {/* Quick Contact & Details Row */}
             <div className="report-summary-details">
               <div className="report-owner-detail">
-                {centre!.udcid === 'MH-PUN-2024-001' && <figure className="report-owner-photo"><Image src="/demo-clinic-owner.png" alt="AI-generated illustration of the demo clinic owner" width={72} height={80} sizes="72px" className="demo-owner-image" /></figure>}
+                {centre!.udcid === 'MH-PUN-2024-001' && <figure className="report-owner-photo"><Image src="/demo-clinic-owner.png" alt="AI-generated illustration of the demo clinic owner" width={96} height={108} sizes="96px" className="demo-owner-image" /></figure>}
                 <div className="report-owner-info">
                   <span className="report-detail-label">Director / Owner</span>
                   <strong>{centre!.owner.name}</strong>
                   <span>{centre!.owner.qualification}</span>
                 </div>
               </div>
-              <div>
+              <div className="report-inspection-detail">
                 <span style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Last Inspection</span>
                 <strong style={{ color: '#0f172a', fontSize: 12, display: 'block', marginTop: 2 }}>
                   {lastInspection ? new Date(lastInspection).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not recorded'}
