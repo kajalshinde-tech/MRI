@@ -192,28 +192,14 @@ export default function CentreProfile({ udcid, standalone = false }: { udcid: st
 
           {/* Centre Hero Profile Card */}
           <div className="app-card report-summary-card">
-            <div className="report-clinic-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <span style={{ fontSize: 10, fontWeight: 750, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#0f766e', background: '#f0fdfa', padding: '2px 8px', borderRadius: 4, border: '1px solid #ccfbf1' }}>
-                    {centre!.type}
-                  </span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: '#475569' }}>
-                    · {centre!.ownershipType}
-                  </span>
-                </div>
-                <h1 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: '4px 0 6px', letterSpacing: '-0.4px', lineHeight: 1.25 }}>
-                  {centre!.name}
-                </h1>
-                <p style={{ fontSize: 12, color: '#334155', display: 'flex', alignItems: 'flex-start', gap: 5, margin: 0, lineHeight: 1.4 }}>
-                  <MapPin size={14} style={{ color: '#0d9488', flexShrink: 0, marginTop: 2 }} />
-                  <span>{centre!.address}, {centre!.taluka}, {centre!.district} — {centre!.pincode}</span>
-                </p>
+            <div className="report-clinic-heading">
+              <div className="report-clinic-meta">
+                <span className="report-facility-type">{centre!.type}</span>
+                <span className="report-ownership">{centre!.ownershipType}</span>
+                <span className={`pub-badge ${centre!.status === 'Approved' ? 'pub-badge-teal' : centre!.status === 'Rejected' ? 'pub-badge-red' : 'pub-badge-amber'}`}>{centre!.status}</span>
               </div>
-
-              <span className={`pub-badge ${centre!.status === 'Approved' ? 'pub-badge-teal' : centre!.status === 'Rejected' ? 'pub-badge-red' : 'pub-badge-amber'}`} style={{ padding: '4px 10px', fontSize: 11, borderRadius: 20, flexShrink: 0 }}>
-                {centre!.status}
-              </span>
+              <h1>{centre!.name}</h1>
+              <p className="report-clinic-address">{[centre!.address, centre!.taluka, centre!.district].filter((part, index, parts) => parts.indexOf(part) === index).join(', ')} — {centre!.pincode}</p>
             </div>
 
             {/* Quick Contact & Details Row */}
